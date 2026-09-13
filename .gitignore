@@ -1,0 +1,6 @@
+.env
+*.log
+docs/screenshots/*.tmp
+__pycache__/
+*.pyc
+backups/
