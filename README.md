@@ -376,3 +376,167 @@ The screenshot shows a successful execution of `infra_health_check.sh`, includin
 
 ---
 
+Task 4: Monitoring, Backups & Disaster Recovery
+Objective
+
+Implement database backup and basic system/container monitoring.
+
+Database Backup
+
+The database backup script is stored in the repository at:
+
+scripts/db_backup.sh
+
+The backup script creates a PostgreSQL database dump, compresses the backup, and stores the resulting backup under:
+
+/var/backups/db/
+
+The required backup naming format is:
+
+db_backup_YYYYMMDD.sql.gz
+
+Example:
+
+db_backup_20260913.sql.gz
+Run Database Backup
+
+Execute:
+
+sudo /opt/scripts/db_backup.sh
+
+Verify the generated backup:
+
+sudo ls -lh /var/backups/db/
+
+The resulting archive should use the .sql.gz format and contain the timestamped database dump.
+
+Database Restore
+
+The backup must first be decompressed and then restored into PostgreSQL.
+
+Use the exact PostgreSQL container/database/user values configured by the project.
+
+Example restoration pattern:
+
+gunzip -c /var/backups/db/db_backup_YYYYMMDD.sql.gz | docker exec -i <postgres-container> psql -U <database-user> -d <database-name>
+
+Before submission, replace <postgres-container>, <database-user>, and <database-name> with the exact values from docker-compose.yml and db_backup.sh.
+
+Backup Verification
+
+Verify that the backup directory exists:
+
+sudo ls -lh /var/backups/db/
+
+Verify the archive type:
+
+file /var/backups/db/db_backup_YYYYMMDD.sql.gz
+Basic Metrics & Monitoring
+
+The project includes lightweight system/container metrics collection.
+
+Monitoring evidence is stored in:
+
+screenshots/metrics.png
+
+The monitoring setup provides basic visibility into infrastructure/container resource usage.
+
+Monitoring Verification
+
+Check running containers:
+
+docker ps
+
+Review the metrics collected by the monitoring setup.
+
+
+
+
+Teardown
+
+Stop the Docker Compose services:
+
+docker compose down
+
+This stops and removes the containers while preserving the PostgreSQL volume.
+
+To remove the stack and its persistent database volume, use:
+
+docker compose down -v
+
+Use -v only when intentionally deleting the stored database data.
+
+Git Workflow
+
+Git was used to track the implementation through separate feature branches.
+
+Branches
+main
+feature/system-provisioning
+feature/docker-setup
+feature/scripts
+backup-before-history-cleanup
+Feature Branches
+Task 1
+feature/system-provisioning
+
+Used for Linux system provisioning and SSH/firewall configuration.
+
+Task 2
+feature/docker-setup
+
+Used for Docker Compose, Flask, PostgreSQL, and Nginx configuration.
+
+Task 3 and Task 4
+feature/scripts
+
+Used for infrastructure health checks, cron automation, database backups, monitoring, and related documentation.
+
+Merge Workflow
+
+Feature branches were merged into main.
+
+The final implementation was pushed to:
+
+origin/main
+
+The working tree was verified as clean after the merges.
+
+Repository Structure
+devops-infrastructure-assignment/
+│
+├── app/
+│   └── app.py
+│
+├── config/
+│   └── infra_health_check.cron
+│
+├── nginx/
+│   └── ...
+│
+├── scripts/
+│   ├── db_backup.sh
+│   └── infra_health_check.sh
+│
+├── screenshots/
+│   ├── ufw-status.png
+│   ├── ssh-hardening.png
+│   ├── trainee-sudo-priveleges.png
+│   ├── docker-ps.png
+│   ├── reverse-proxy.png
+│   ├── database-health.png
+│   ├── database-persistence.png
+│   ├── infra-health-check.png
+│   ├── db-backup.png
+│   └── metrics.png
+│
+├── src/
+│   └── devops_trainee_assignment/
+│
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── pyproject.toml
+├── README.md
+└── uv.lock
