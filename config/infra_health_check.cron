@@ -1,0 +1,1 @@
+*/15 * * * * root /opt/scripts/infra_health_check.sh
