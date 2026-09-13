@@ -372,3 +372,19 @@ sudo cat /etc/cron.d/infra_health_check
 The screenshot shows a successful execution of `infra_health_check.sh`, including CPU, RAM, disk, Docker, and application-container status, together with timestamped warning entries from the verification tests.
 
 ![Infrastructure health check](screenshots/infra-health-check.png)
+
+
+---
+
+## Task 4 — Database Backup and Monitoring
+
+### Database Backup
+
+A PostgreSQL backup script is provided at:
+
+```text
+scripts/db_backup.sh
+The script creates a compressed SQL backup of the PostgreSQL database and stores it under:
+
+```text
+/var/backups/db/

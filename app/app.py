@@ -1,5 +1,7 @@
 import os
 import socket
+import shutil
+import time
 
 import psycopg2
 from flask import Flask, jsonify
@@ -52,6 +54,40 @@ def health():
         return jsonify(status="ok", database="reachable"), 200
     except Exception as exc:
         return jsonify(status="degraded", database=str(exc)), 503
+
+
+
+@app.route("/metrics")
+def metrics():
+    load_1, load_5, load_15 = os.getloadavg()
+
+    memory = {}
+    with open("/proc/meminfo") as f:
+        for line in f:
+            key, value = line.split(":", 1)
+            if key in ("MemTotal", "MemAvailable"):
+                memory[key] = int(value.strip().split()[0]) * 1024
+
+    mem_total = memory["MemTotal"]
+    mem_available = memory["MemAvailable"]
+    mem_used = mem_total - mem_available
+    mem_percent = (mem_used / mem_total) * 100
+
+    disk = shutil.disk_usage("/")
+    disk_percent = (disk.used / disk.total) * 100
+
+    with open("/proc/uptime") as f:
+        uptime_seconds = float(f.read().split()[0])
+
+    return jsonify(
+        cpu_load_1m=round(load_1, 2),
+        cpu_load_5m=round(load_5, 2),
+        cpu_load_15m=round(load_15, 2),
+        memory_used_percent=round(mem_percent, 2),
+        disk_used_percent=round(disk_percent, 2),
+        uptime_seconds=round(uptime_seconds, 2),
+        timestamp=int(time.time()),
+    )
 
 
 @app.route("/visits")
