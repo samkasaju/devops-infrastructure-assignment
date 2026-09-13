@@ -221,3 +221,154 @@ The health endpoint confirms that the Flask backend can successfully reach Postg
 The visit counter remains persistent after stopping and recreating the Docker Compose containers, demonstrating that PostgreSQL data is stored in a persistent Docker volume.
 
 ![Database persistence](screenshots/database-persistence.png)
+
+## Task 3: Automation & Shell Scripting
+
+### Objective
+
+Automate infrastructure health monitoring with a Bash script that checks system resources, Docker availability, and the application container status.
+
+### Health Check Script
+
+The health-check script is stored in the repository at:
+
+```text
+scripts/infra_health_check.sh
+```
+
+The deployed script is located at:
+
+```text
+/opt/scripts/infra_health_check.sh
+```
+
+The script checks:
+
+* CPU utilization
+* RAM utilization
+* Root filesystem usage
+* Docker service status
+* Application container status
+
+### Disk Usage Warning
+
+If root filesystem usage exceeds **85%**, the script:
+
+1. Prints a `[WARNING]` message to the terminal.
+2. Appends a timestamped warning to:
+
+```text
+/var/log/infra_health.log
+```
+
+The threshold is implemented as:
+
+```bash
+if [ "$DISK_USAGE" -gt 85 ]; then
+```
+
+### Application Container Warning
+
+The script checks the status of the application container:
+
+```text
+devops_trainee_assignment-backend-1
+```
+
+If the container is stopped or unavailable, the script prints a `[WARNING]` message and records a timestamped entry in the health log.
+
+### Manual Execution
+
+Run the health check with:
+
+```bash
+sudo /opt/scripts/infra_health_check.sh
+```
+
+A successful execution reports the current infrastructure status, for example:
+
+```text
+========================================
+Infrastructure Health Check
+Timestamp: 2026-09-13 21:06:41
+========================================
+CPU Usage: 6.6%
+RAM Usage: 41.1%
+Root Disk Usage: 56%
+Docker Status: running
+Application Container: running
+========================================
+```
+
+### Health Check Log
+
+View the warning log with:
+
+```bash
+sudo cat /var/log/infra_health.log
+```
+
+The log contains timestamped warning entries generated when monitored conditions fail.
+
+Example entries from the verification tests include:
+
+```text
+2026-09-13 20:52:18 [WARNING] Root disk usage is 56%
+2026-09-13 20:55:53 [WARNING] Application container 'devops_trainee_assignment-backend-1' is stopped or unavailable
+```
+
+These entries demonstrate that the warning and logging functionality was tested.
+
+### Cron Automation
+
+The cron configuration is stored in the repository at:
+
+```text
+config/infra_health_check.cron
+```
+
+The health check is scheduled to run every 15 minutes:
+
+```text
+*/15 * * * * root /opt/scripts/infra_health_check.sh
+```
+
+Verify the installed cron configuration with:
+
+```bash
+sudo cat /etc/cron.d/infra_health_check
+```
+
+### Verification
+
+Check that the deployed script exists and is executable:
+
+```bash
+ls -l /opt/scripts/infra_health_check.sh
+```
+
+Run the health check manually:
+
+```bash
+sudo /opt/scripts/infra_health_check.sh
+```
+
+Review the warning log:
+
+```bash
+sudo cat /var/log/infra_health.log
+```
+
+Verify the cron schedule:
+
+```bash
+sudo cat /etc/cron.d/infra_health_check
+```
+
+### Evidence
+
+#### Infrastructure Health Check
+
+The screenshot shows a successful execution of `infra_health_check.sh`, including CPU, RAM, disk, Docker, and application-container status, together with timestamped warning entries from the verification tests.
+
+![Infrastructure health check](screenshots/infra-health-check.png)
